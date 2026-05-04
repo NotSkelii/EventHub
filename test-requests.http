@@ -1,0 +1,172 @@
+### Variables
+@baseUrl = http://localhost:8081/api/v1/events
+@userId = user123
+
+### Create event POST request
+
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "Summer Music Festival",
+  "description": "Amazing 3-day music festival with top artists",
+  "venue": "Central Park",
+  "city": "New York",
+  "category": "FESTIVAL",
+  "eventDate": "2027-07-15T14:00:00",
+  "totalSeats": 5000,
+  "price": 149.99
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.global.set("eventId", response.body.id);
+    });
+%}
+
+### Create concert event POST request
+
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "Rock Concert 2024",
+  "description": "Top rock bands live in concert",
+  "venue": "Madison Square Garden",
+  "city": "New York",
+  "category": "CONCERT",
+  "eventDate": "2027-06-15T20:00:00",
+  "totalSeats": 2000,
+  "price": 89.99
+}
+
+### Create Sports event POST request
+
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "Championship Final",
+  "description": "Exciting football championship final",
+  "venue": "Wembley Stadium",
+  "city": "London",
+  "category": "SPORTS",
+  "eventDate": "2027-05-20T15:00:00",
+  "totalSeats": 10000,
+  "price": 200.00
+}
+
+### Create Theater event POST request
+
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "Broadway Musical",
+  "description": "Award-winning musical performance",
+  "venue": "Broadway Theater",
+  "city": "New York",
+  "category": "THEATER",
+  "eventDate": "2027-04-10T19:30:00",
+  "totalSeats": 800,
+  "price": 120.00
+}
+
+### Get all Events (with filters)
+
+GET {{baseUrl}}
+
+### Get events by category
+GET {{baseUrl}}?category=FESTIVAL
+
+### Get events by city
+GET {{baseUrl}}?city=New%20York
+
+### Get events by category and city
+GET {{baseUrl}}?category=THEATER&city=New%20York
+
+### Get events with pagination
+GET {{baseUrl}}?page=0&size=10&sort=eventDate,asc
+
+
+### Get Event by id
+
+GET {{baseUrl}}/40e8420a-3f1a-4f95-8005-75a55ca7af6a
+
+
+### Update Event by id
+
+PUT {{baseUrl}}/40e8420a-3f1a-4f95-8005-75a55ca7af6a
+Content-Type: application/json
+X-User-Id:{{userId}}
+
+{
+  "name": "Summer Music Festival - Updated",
+  "description": "Even better 3-day music festival",
+  "venue": "Central Park",
+  "city": "New York",
+  "category": "FESTIVAL",
+  "eventDate": "2027-07-15T14:00:00",
+  "totalSeats": 5500,
+  "price": 169.99
+}
+
+### Reserve seats as userId
+
+POST {{baseUrl}}/40e8420a-3f1a-4f95-8005-75a55ca7af6a/reserve?quantity=2
+X-User-Id: {{userId}}
+
+### Reserve seats as another user
+
+POST {{baseUrl}}/40e8420a-3f1a-4f95-8005-75a55ca7af6a/reserve?quantity=5
+X-User-Id: anotherUser
+
+### Cancel seat reservations
+
+POST {{baseUrl}}/40e8420a-3f1a-4f95-8005-75a55ca7af6a/cancel-reservation?quantity=2
+
+### Delete Event
+
+DELETE {{baseUrl}}/476595a5-cb39-44f0-ad7a-fb04d7da9b28
+X-User-Id: {{userId}}
+
+### New Json parse consumer test
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "JSON Consumer Test",
+  "description": "Testing proper JSON parsing with DTO",
+  "venue": "Kafka Center",
+  "city": "Tech City",
+  "category": "CONFERENCE",
+  "eventDate": "2026-12-31T20:00:00",
+  "totalSeats": 1000,
+  "price": 299.994
+}
+
+### POST request to test analytics DB
+POST {{baseUrl}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "name": "Analytics DB Test",
+  "venue": "Test Venue",
+  "city": "Athens",
+  "category": "CONFERENCE",
+  "eventDate": "2027-12-31T20:00:00",
+  "totalSeats": 100,
+  "price": 99.99
+}
+
+###
+
+DELETE {{baseUrl}}/c827c889-83e5-4b4b-bc6d-f602f8607932
+X-User-Id: {{userId}}

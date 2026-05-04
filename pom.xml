@@ -35,6 +35,7 @@
     <modules>
         <module>common</module>
         <module>event-service</module>
+        <module>analytics-service</module>
     </modules>
 
     <dependencyManagement>

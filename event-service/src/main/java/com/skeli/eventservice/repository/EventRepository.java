@@ -19,10 +19,18 @@ public interface EventRepository extends JpaRepository<Event, String> {
     Page<Event> findByCategory(String category, Pageable pageable);
     Page<Event> findByCityAndEventDateAfter(String city, LocalDateTime date, Pageable pageable);
     Page<Event> findByEventDateAfter(LocalDateTime date, Pageable pageable);
+    Page<Event> findByCityAndCategory(String city, String category, Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT e FROM Event e WHERE e.id = :id")
     Optional<Event> findByIdWithLock(@Param("id") String id);
 
-    Boolean existsByIdAndOrganizerId(String id, String organizerId);
+    boolean existsByIdAndOrganizerId(String id, String organizerId);
+    boolean existsByNameAndVenueAndCityAndEventDateBetween(
+            String name,
+            String venue,
+            String city,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }

@@ -68,13 +68,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.skeli</groupId>
-			<artifactId>event-platform</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.skeli</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

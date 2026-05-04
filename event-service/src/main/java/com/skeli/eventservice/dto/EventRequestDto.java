@@ -31,11 +31,11 @@ public class EventRequestDto {
     @NotBlank(message = "Category cannot be blank")
     private String category;
 
-    @NotBlank(message = "Event date cannot be blank")
+    @NotNull(message = "Event date cannot be blank")
     @Future(message = "Event date must be in the future")
     private LocalDateTime eventDate;
 
-    @NotBlank(message = "Total seats cannot be blank")
+    @NotNull(message = "Total seats cannot be blank")
     @Min(value = 1, message = "Total seats must be greater than 0")
     private Integer totalSeats;
 

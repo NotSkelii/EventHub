@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: analytics-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/analytics
+    username: admin
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: analytics-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      properties:
+        enable.idempotence: true
+        isolation.level: read_committed
+
+server:
+  port: 8082
+
+logging:
+  level:
+    com.skeli: debug

@@ -15,15 +15,15 @@ public class EventProducer {
     public void sendEventCreated(Event event){
         EventCreatedEvent eventCreated = EventCreatedEvent.builder()
                 .eventId(event.getId())
-                .eventName(event.getName())
-                .category(event.getCategory())
-                .eventDate(event.getEventDate())
+                .eventName(event.getName())  // Make sure this matches DTO
                 .venue(event.getVenue())
                 .city(event.getCity())
+                .category(event.getCategory())
+                .eventDate(event.getEventDate())
                 .totalSeats(event.getTotalSeats())
-                .price(event.getPrice())
+                .price(event.getPrice())  // BigDecimal
                 .organizerId(event.getOrganizerId())
-                .timeStamp(System.currentTimeMillis())
+                .timeStamp(System.currentTimeMillis())  // Note: timeStamp with capital S
                 .build();
 
         kafkaTemplate.send("event-created", event.getId(), eventCreated);

@@ -3,6 +3,7 @@ package com.skeli.eventservice.service;
 import com.skeli.eventservice.dto.EventRequestDto;
 import com.skeli.eventservice.dto.EventResponseDto;
 import com.skeli.eventservice.entity.Event;
+import com.skeli.eventservice.exception.DuplicateExceptionHandler;
 import com.skeli.eventservice.kafka.EventProducer;
 import com.skeli.eventservice.mapper.EventMapper;
 import com.skeli.eventservice.repository.EventRepository;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,23 @@ public class EventService {
     @Transactional
     public EventResponseDto createEvent(EventRequestDto request, String organizerId) {
         log.info("Creating event: {} for organizer: {}", request.getName(), organizerId);
+
+        int bufferDays = 30;
+        LocalDateTime windowStart = request.getEventDate().minusDays(bufferDays);
+        LocalDateTime windowEnd = request.getEventDate().plusDays(bufferDays);
+
+        boolean duplicatesExist = eventRepository.existsByNameAndVenueAndCityAndEventDateBetween(
+                request.getName(),
+                request.getVenue(),
+                request.getCity(),
+                windowStart,
+                windowEnd
+        );
+
+        if(duplicatesExist) {
+            throw new DuplicateExceptionHandler(String.format("Cannot create event. A similar event at '%s' in '%s' already exists within '%s' days of the requested date." +
+                    "Please choose a different date, venue or event name", request.getVenue(), request.getCity(), bufferDays));
+        }
 
         Event event = eventMapper.toEntity(request);
         event.setOrganizerId(organizerId);
@@ -109,7 +129,7 @@ public class EventService {
     public Page<EventResponseDto> searchEvents(String category, String city, Pageable pageable) {
         Page<Event> events;
         if (category != null && city != null) {
-            events = eventRepository.findByCityAndEventDateAfter(city, java.time.LocalDateTime.now(), pageable);
+            events = eventRepository.findByCityAndCategory(city, category, pageable);
         } else if (category != null) {
             events = eventRepository.findByCategory(category, pageable);
         } else if (city != null) {
