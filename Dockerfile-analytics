@@ -1,0 +1,51 @@
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+
+COPY common common
+COPY analytics-service analytics-service
+
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > pom.xml && \
+    echo '<project xmlns="http://maven.apache.org/POM/4.0.0"' >> pom.xml && \
+    echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> pom.xml && \
+    echo '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0' >> pom.xml && \
+    echo '         http://maven.apache.org/xsd/maven-4.0.0.xsd">' >> pom.xml && \
+    echo '    <modelVersion>4.0.0</modelVersion>' >> pom.xml && \
+    echo '    <groupId>com.skeli</groupId>' >> pom.xml && \
+    echo '    <artifactId>event-platform</artifactId>' >> pom.xml && \
+    echo '    <version>0.0.1-SNAPSHOT</version>' >> pom.xml && \
+    echo '    <packaging>pom</packaging>' >> pom.xml && \
+    echo '    <modules>' >> pom.xml && \
+    echo '        <module>common</module>' >> pom.xml && \
+    echo '        <module>analytics-service</module>' >> pom.xml && \
+    echo '    </modules>' >> pom.xml && \
+    echo '    <properties>' >> pom.xml && \
+    echo '        <java.version>17</java.version>' >> pom.xml && \
+    echo '        <mapstruct.version>1.5.5.Final</mapstruct.version>' >> pom.xml && \
+    echo '    </properties>' >> pom.xml && \
+    echo '    <parent>' >> pom.xml && \
+    echo '        <groupId>org.springframework.boot</groupId>' >> pom.xml && \
+    echo '        <artifactId>spring-boot-starter-parent</artifactId>' >> pom.xml && \
+    echo '        <version>3.5.14</version>' >> pom.xml && \
+    echo '        <relativePath/>' >> pom.xml && \
+    echo '    </parent>' >> pom.xml && \
+    echo '    <dependencyManagement>' >> pom.xml && \
+    echo '        <dependencies>' >> pom.xml && \
+    echo '            <dependency>' >> pom.xml && \
+    echo '                <groupId>com.skeli</groupId>' >> pom.xml && \
+    echo '                <artifactId>common</artifactId>' >> pom.xml && \
+    echo '                <version>${project.version}</version>' >> pom.xml && \
+    echo '            </dependency>' >> pom.xml && \
+    echo '        </dependencies>' >> pom.xml && \
+    echo '    </dependencyManagement>' >> pom.xml && \
+    echo '</project>' >> pom.xml
+
+RUN mvn clean package -pl analytics-service -am -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+COPY --from=build /app/analytics-service/target/analytics-service-*.jar app.jar
+
+EXPOSE 8082
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

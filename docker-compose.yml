@@ -15,12 +15,35 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - eventhub-network
+
+  postgres-analytics:
+    image: postgres:15
+    container_name: eventhub-postgres-analytics
+    environment:
+      POSTGRES_DB: analytics
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_analytics_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d analytics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventhub-network
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: eventhub-zookeeper
     ports:
       - "2181:2181"
+    networks:
+      - eventhub-network
 
   kafka:
     image: wurstmeister/kafka:latest
@@ -28,11 +51,59 @@ services:
     depends_on:
       - zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "event-created:1:1"
     ports:
       - "9092:9092"
+    networks:
+      - eventhub-network
+
+  event-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-event
+    container_name: eventhub-event-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eventhub
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8081:8081"
+    networks:
+      - eventhub-network
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-analytics
+    container_name: eventhub-analytics-service
+    depends_on:
+      postgres-analytics:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-analytics:5432/analytics
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8082:8082"
+    networks:
+      - eventhub-network
+
 
 volumes:
   postgres_data:
+  postgres_analytics_data:
+
+networks:
+  eventhub-network:
+    driver: bridge

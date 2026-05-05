@@ -3,9 +3,9 @@ spring:
     name: analytics-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/analytics
-    username: admin
-    password: secret
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/analytics}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -14,7 +14,7 @@ spring:
     show-sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: analytics-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
