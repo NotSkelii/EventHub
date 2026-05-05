@@ -37,6 +37,25 @@ services:
     networks:
       - eventhub-network
 
+  postgres-authentication:
+    image: postgres:15
+    container_name: eventhub-postgres-authentication
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_authentication_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventhub-network
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: eventhub-zookeeper
@@ -99,10 +118,33 @@ services:
     networks:
       - eventhub-network
 
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-auth
+    container_name: eventhub-auth-service
+    depends_on:
+      postgres-authentication:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-authentication:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: fJ7nh17sGEEWg6ejnZ03ovLq2yBqXU6jH8nK4C7SpCC
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8083:8083"
+    networks:
+      - eventhub-network
+
 
 volumes:
   postgres_data:
   postgres_analytics_data:
+  postgres_authentication_data:
 
 networks:
   eventhub-network:

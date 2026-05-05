@@ -1,0 +1,100 @@
+### Vars
+
+@baseUrl = http://localhost:8083/api/v1/auth
+
+###
+
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+###
+
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "username": "jane_smith",
+  "email": "jane@example.com",
+  "password": "password456"
+}
+
+###
+
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+
+### Login Posts
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "username": "jane_smith",
+  "password": "password456"
+}
+> {%
+    client.global.set("auth_token", response.body.token);
+    client.log("Token saved: " + response.body.token);
+%}
+
+###
+
+POST {{baseUrl}}/login
+
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Validate Token
+
+GET {{baseUrl}}/validate
+Authorization: Bearer {{auth_token}}
+
+
+### Wrong Credentials
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "password": "wrong_password"
+}
+
+### Register with existing username (should fail)
+
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "unique@example.com",
+  "password": "password123"
+}
+
+### Register with existing email (should fail)
+
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "username": "unique_user",
+  "email": "john@example.com",
+  "password": "password123"
+}
