@@ -3,7 +3,7 @@ spring:
     name: event-service
 
   datasource:
-    url: ${SPRING_DATA_SOURCE_URL:jdbc:postgresql://localhost:5432/eventhub}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/eventhub}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
     password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
@@ -27,10 +27,16 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
+        enable.idempotence: true
+        acks: all
 
 server:
   port: 8081
 
+jwt:
+  secret: ${JWT_SECRET}
+
 logging:
   level:
     com.skeli: debug
+    org.springframework.security: DEBUG

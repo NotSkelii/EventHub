@@ -3,6 +3,7 @@ package com.skeli.eventservice.controller;
 import com.skeli.eventservice.dto.EventRequestDto;
 import com.skeli.eventservice.dto.EventResponseDto;
 import com.skeli.eventservice.service.EventService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,8 +22,9 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestBody EventRequestDto request,
-                                                        @RequestHeader(value = "X-User-Id", required = false, defaultValue = "system") String organizerId) {
-        EventResponseDto response = eventService.createEvent(request, organizerId);
+                                                        HttpServletRequest httpRequest){
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        EventResponseDto response = eventService.createEvent(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -35,20 +37,23 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<EventResponseDto> updateEvent(@PathVariable String id,
                                                         @Valid @RequestBody EventRequestDto request,
-                                                        @RequestHeader(value = "X-User-Id") String organizerId) {
-        EventResponseDto response = eventService.updateEvent(id, request, organizerId);
+                                                        HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        EventResponseDto response = eventService.updateEvent(id, request, userId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable String id, @RequestHeader(value = "X-User-Id") String organizerId) {
-        eventService.deleteEvent(id, organizerId);
+    public ResponseEntity<Void> deleteEvent(@PathVariable String id, HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        eventService.deleteEvent(id, userId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/reserve")
     public ResponseEntity<Void> reserveSeats(@PathVariable String id, @RequestParam int quantity,
-                                             @RequestHeader(value = "X-User-Id") String userId) {
+                                             HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
         eventService.reserveSeats(id, quantity, userId);
         return ResponseEntity.accepted().build();
     }
