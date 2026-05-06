@@ -3,7 +3,7 @@ package com.skeli.analyticsservice.consumer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skeli.analyticsservice.entity.AnalyticsEvent;
-import com.skeli.analyticsservice.repository.AnalyticsEventRespository;
+import com.skeli.analyticsservice.repository.AnalyticsEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaConsumer {
-    private final AnalyticsEventRespository analyticsEventRespository;
+    private final AnalyticsEventRepository analyticsEventRespository;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "event-created", groupId = "analytics-group")

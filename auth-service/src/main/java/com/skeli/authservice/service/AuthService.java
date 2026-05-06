@@ -1,6 +1,6 @@
 package com.skeli.authservice.service;
 
-import com.skeli.authservice.dto.AuthResponse;
+import com.skeli.authservice.dto.AuthResponseDto;
 import com.skeli.authservice.dto.LoginRequest;
 import com.skeli.authservice.dto.RegisterRequest;
 import com.skeli.authservice.entity.Role;
@@ -25,7 +25,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponseDto register(RegisterRequest request) {
         // Check if user exists
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already taken");
@@ -49,7 +49,7 @@ public class AuthService {
         // Generate token
         String token = jwtService.generateToken(user);
 
-        return AuthResponse.builder()
+        return AuthResponseDto.builder()
                 .token(token)
                 .id(user.getId())
                 .username(user.getUsername())
@@ -59,7 +59,7 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponseDto login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
@@ -69,7 +69,7 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
-        return AuthResponse.builder()
+        return AuthResponseDto.builder()
                 .token(token)
                 .id(user.getId())
                 .username(user.getUsername())
@@ -79,12 +79,12 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse validateAndGetUser(String token) {
+    public AuthResponseDto validateAndGetUser(String token) {
         String username = jwtService.extractUsername(token);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return AuthResponse.builder()
+        return AuthResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())

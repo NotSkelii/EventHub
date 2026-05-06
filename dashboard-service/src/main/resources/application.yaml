@@ -1,3 +1,21 @@
 spring:
   application:
     name: dashboard-service
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    check-template-location: true
+
+server:
+  port: 8084
+
+services:
+  auth: http://eventhub-auth-service:8083
+  event: http://eventhub-event-service:8081
+  analytics: http://eventhub-analytics-service:8082
+
+logging:
+  level:
+    com.skeli: debug

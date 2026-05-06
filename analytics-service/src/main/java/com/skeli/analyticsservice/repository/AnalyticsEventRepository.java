@@ -7,10 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AnalyticsEventRespository extends JpaRepository<AnalyticsEvent, Long> {
+public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, Long> {
 
     List<AnalyticsEvent> findByCategory(String category);
     List<AnalyticsEvent> findByCity(String city);
 
     boolean existsByEventId(String eventId);
+
+    long countByCategory(String category);
 }

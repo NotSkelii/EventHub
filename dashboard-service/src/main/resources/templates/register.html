@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>EventHub - Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background: #fffff5;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgb(28 27 27 / 0.13);
+            width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #667eea;
+            color: #fffff5;
+            border: none;
+            border-radius: 500px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .error {
+            color: #640a0a;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <h2>Create Account</h2>
+    <form action="/register" method="post" onsubmit="return validatePassword()">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email@email.com" required>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required>
+        <button type="submit" id="registerButton">Register</button>
+    </form>
+    <div class=error th:if="${error}" th:text="${error}"></div>
+    <div class="login-link">
+        Already have an account? <a href="/login">Login here</a>
+    </div>
+</div>
+<script>
+    function validatePassword() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return false;
+        }
+
+        var button = document.getElementById("registerButton");
+        button.textContent = "Creating account...";
+        button.disabled = true;
+
+        return true;
+    }
+</script>
+</body>
+</html>

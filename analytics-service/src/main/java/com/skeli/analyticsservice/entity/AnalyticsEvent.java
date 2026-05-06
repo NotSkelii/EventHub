@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnalyticsEvent {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +29,7 @@ public class AnalyticsEvent {
     private String category;
     private String city;
 
-    @Column(name = "raw_message", nullable = false)
+    @Column(name = "raw_message", columnDefinition = "TEXT")
     private String rawMessage;
 
     @Column(name = "received_at", nullable = false)
