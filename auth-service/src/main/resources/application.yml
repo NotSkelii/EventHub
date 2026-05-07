@@ -1,42 +1,18 @@
 spring:
   application:
     name: auth-service
-
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/auth_db}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
     password: ${SPRING_DATASOURCE_PASSWORD:secret}
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-      show_sql: true
-
-  kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    # Auth service doesn't produce/consume events yet, but we'll add it later
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      group-id: auth-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-
+    show-sql: true
 
 server:
-  port: 8083
+  port: ${AUTH_SERVICE_PORT:8083}
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
-
-
-
+  expiration: ${JWT_EXPIRATION:86400000}

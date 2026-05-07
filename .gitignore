@@ -1,33 +1,27 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Environment variables
+.env
+.env.local
+.env.*.local
+.docker-compose.override.yml
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IDE files
+.idea/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
+.settings/
+.project
+.classpath
+
+# Log files
+*.log
+logs/
+
+# Docker volumes
+volumes/
+
+# Application specific
+event-service/target/
+analytics-service/target/
+auth-service/target/
+dashboard-service/target/
+common/target/

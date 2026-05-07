@@ -59,12 +59,13 @@ public class EventController {
     }
 
     @PostMapping("/{id}/cancel-reservation")
-    public ResponseEntity<Void> cancelReservation(@PathVariable String id, @RequestParam int quantity) {
+    public ResponseEntity<Void> cancelReservation(@PathVariable String id, @RequestParam int quantity,
+                                                  HttpServletRequest httpRequest) {
         if (quantity <= 0) {
             return ResponseEntity.badRequest().build();
         }
-
-        eventService.cancelReservation(id, quantity);
+        String userId = (String) httpRequest.getAttribute("X-User-Id");
+        eventService.cancelReservation(id, quantity, userId);
         return ResponseEntity.ok().build();
     }
 

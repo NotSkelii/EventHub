@@ -100,11 +100,14 @@ public class EventService {
 
         event.setAvailableSeats(event.getAvailableSeats() - quantity);
         eventRepository.save(event);
+
+        eventProducer.sendSeatReserved(event, quantity, userId);
+
         log.info("Reserved {} seats for event: {} for user {}. Remaining seats: {}", quantity, id, userId, event.getAvailableSeats());
     }
 
     @Transactional
-    public void cancelReservation(String id, int quantity) {
+    public void cancelReservation(String id, int quantity, String userId) {
         log.info("Canceling reservation for event: {}, quantity: {}", id, quantity);
 
         Event event = eventRepository.findById(id)
@@ -122,6 +125,9 @@ public class EventService {
         }
         event.setAvailableSeats(newAvailableSeats);
         eventRepository.save(event);
+
+        eventProducer.sendSeatCancelled(event, quantity, userId);
+
         log.info("Cancelled {} seats for event: {}. Remaining seats: {}", quantity, id, event.getAvailableSeats());
     }
 

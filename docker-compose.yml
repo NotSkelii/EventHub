@@ -3,15 +3,15 @@ services:
     image: postgres:15
     container_name: eventhub-postgres
     environment:
-      POSTGRES_DB: eventhub
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${POSTGRES_EVENTHUB_DB:-eventhub}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d eventhub" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_EVENTHUB_DB:-eventhub}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,15 +22,15 @@ services:
     image: postgres:15
     container_name: eventhub-postgres-analytics
     environment:
-      POSTGRES_DB: analytics
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${POSTGRES_ANALYTICS_DB:-analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_ANALYTICS_PORT:-5433}:5432"
     volumes:
       - postgres_analytics_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d analytics" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_ANALYTICS_DB:-analytics}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,15 +41,15 @@ services:
     image: postgres:15
     container_name: eventhub-postgres-authentication
     environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${POSTGRES_AUTH_DB:-auth_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
     ports:
-      - "5434:5432"
+      - "${POSTGRES_AUTH_PORT:-5434}:5432"
     volumes:
       - postgres_authentication_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d auth_db" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_AUTH_DB:-auth_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,11 +70,11 @@ services:
     depends_on:
       - zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "event-created:1:1"
+      KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_HOST:-kafka}
+      KAFKA_ZOOKEEPER_CONNECT: ${ZOOKEEPER_CONNECT:-zookeeper:2181}
+      KAFKA_CREATE_TOPICS: "event-created:1:1, seat-reserved:1:1, seat-cancelled:1:1"
     ports:
-      - "9092:9092"
+      - "${KAFKA_PORT:-9092}:9092"
     networks:
       - eventhub-network
 
@@ -89,13 +89,13 @@ services:
       kafka:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eventhub
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      JWT_SECRET: f1966ea1723424b2d36307efb224a01a2af5572f9c07924b7869c4507e3a274bf6327e3402257177dc6ca786e514fa31225884f13e152ef895f6553fb98f3db8
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_EVENTHUB_DB:-eventhub}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "8081:8081"
+      - "${EVENT_SERVICE_PORT:-8081}:8081"
     networks:
       - eventhub-network
 
@@ -110,12 +110,12 @@ services:
       kafka:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-analytics:5432/analytics
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-analytics:5432/${POSTGRES_ANALYTICS_DB:-analytics}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
     ports:
-      - "8082:8082"
+      - "${ANALYTICS_SERVICE_PORT:-8082}:8082"
     networks:
       - eventhub-network
 
@@ -130,14 +130,14 @@ services:
       kafka:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-authentication:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      JWT_SECRET: f1966ea1723424b2d36307efb224a01a2af5572f9c07924b7869c4507e3a274bf6327e3402257177dc6ca786e514fa31225884f13e152ef895f6553fb98f3db8
-      JWT_EXPIRATION: 86400000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-authentication:5432/${POSTGRES_AUTH_DB:-auth_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
     ports:
-      - "8083:8083"
+      - "${AUTH_SERVICE_PORT:-8083}:8083"
     networks:
       - eventhub-network
 
@@ -147,11 +147,11 @@ services:
       dockerfile: Dockerfile-dashboard
     container_name: eventhub-dashboard-service
     environment:
-      SERVICES_AUTH: http://auth-service:8083
-      SERVICES_EVENT: http://event-service:8081
-      SERVICES_ANALYTICS: http://analytics-service:8082
+      SERVICES_AUTH: http://auth-service:${AUTH_SERVICE_PORT:-8083}
+      SERVICES_EVENT: http://event-service:${EVENT_SERVICE_PORT:-8081}
+      SERVICES_ANALYTICS: http://analytics-service:${ANALYTICS_SERVICE_PORT:-8082}
     ports:
-      - "8084:8084"
+      - "${DASHBOARD_SERVICE_PORT:-8084}:8084"
     networks:
       - eventhub-network
     depends_on:
@@ -162,9 +162,13 @@ services:
 
 volumes:
   postgres_data:
+    name: ${POSTGRES_VOLUME_NAME:-postgres_data}
   postgres_analytics_data:
+    name: ${POSTGRES_ANALYTICS_VOLUME_NAME:-postgres_analytics_data}
   postgres_authentication_data:
+    name: ${POSTGRES_AUTH_VOLUME_NAME:-postgres_authentication_data}
 
 networks:
   eventhub-network:
-    driver: bridge
+    driver: ${NETWORK_DRIVER:-bridge}
+    name: ${NETWORK_NAME:-eventhub-network}

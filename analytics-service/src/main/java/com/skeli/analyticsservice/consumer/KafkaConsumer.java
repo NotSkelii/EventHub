@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaConsumer {
-    private final AnalyticsEventRepository analyticsEventRespository;
+    private final AnalyticsEventRepository analyticsEventRepository;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "event-created", groupId = "analytics-group")
@@ -26,7 +26,7 @@ public class KafkaConsumer {
             JsonNode jsonNode = objectMapper.readTree(message);
             String eventId = jsonNode.get("eventId").asText();
 
-            if (analyticsEventRespository.existsByEventId(eventId)) {
+            if (analyticsEventRepository.existsByEventId(eventId)) {
                 log.warn("Event {} already exists in database, skipping", eventId);
                 return;
             }
@@ -42,12 +42,27 @@ public class KafkaConsumer {
                     .rawMessage(message)
                     .build();
 
-            analyticsEventRespository.save(analyticsEvent);
+            analyticsEventRepository.save(analyticsEvent);
             log.info("Event {} saved to database", eventId);
 
         } catch (Exception e) {
             log.error("Failed to process message: {}", e.getMessage(), e);
         }
+    }
 
+    @KafkaListener(topics = "seat-reserved", groupId = "analytics-group")
+    @Transactional
+    public void consumeSeatReserved(String message) {
+        log.info("Received seat-reserved message from Kafka Producer as Raw Json: {}", message);
+
+        //TO-DO Store in db
+    }
+
+    @KafkaListener(topics = "seat-cancelled", groupId = "analytics-group")
+    @Transactional
+    public void consumeSeatCancelled(String message) {
+        log.info("Received seat-cancelled message from Kafka Producer as Raw Json: {}", message);
+
+        //TO-DO Store in db
     }
 }
