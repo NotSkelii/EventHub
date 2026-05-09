@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>EventHub - Create Event</title>
+    <meta name="viewport" content="width = device-width, initial-scale = 1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7fa;
+        }
+        header {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #333;
+        }
+        .nav-links a:hover {
+            color: #667eea;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .cancel-btn {
+            background: #aaa;
+            margin-top: 10px;
+        }
+        .cancel-btn:hover {
+            background: #888;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo"> EventHub</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="events/create" style="color: #667eea">Create Event</a>
+        <a href="/logout">Logout</a>
+    </div>
+</header>
+<div class="container">
+    <div class="form-card">
+        <h2>Create new Event</h2>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <form action="events/create" method="POST">
+            <div class="form-group">
+                <label>Event name *</label>
+                <input type="text" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Venue *</label>
+                    <input type="text" name="venue" required>
+                </div>
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" name="city" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="CONCERT">Concert</option>
+                        <option value="FESTIVAL">Festival</option>
+                        <option value="CONFERENCE">Conference</option>
+                        <option value="SPORTS">Sports</option>
+                        <option value="THEATER">Theater</option>
+                        <option value="WORKSHOP">Workshop</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Event Date *</label>
+                    <input type="datetime-local" name="date" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Total Seats *</label>
+                    <input type="number" name="seats" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (RON)*</label>
+                    <input type="number" step="0.01" name="price" min="1" required>
+                </div>
+            </div>
+
+            <button type="submit">Create Event</button>
+            <button type="button" class="cancel-btn" onclick="window.location.href='/dashboard'">Cancel</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

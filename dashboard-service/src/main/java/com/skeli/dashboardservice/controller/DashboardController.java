@@ -2,6 +2,7 @@ package com.skeli.dashboardservice.controller;
 
 import com.skeli.dashboardservice.dto.AnalyticsEventDto;
 import com.skeli.dashboardservice.dto.AuthResponseDto;
+import com.skeli.dashboardservice.dto.EventCreateDto;
 import com.skeli.dashboardservice.dto.EventDto;
 import com.skeli.dashboardservice.service.DashboardService;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -34,10 +36,10 @@ public class DashboardController {
         return "login";
     }
 
-   @GetMapping("/register")
-   public String registerPage() {
+    @GetMapping("/register")
+    public String registerPage() {
         return "register";
-   }
+    }
 
 
     @GetMapping("/dashboard")
@@ -66,6 +68,17 @@ public class DashboardController {
         return "redirect:/login";
     }
 
+    @GetMapping("/events/create")
+    public String showCreateEventPage(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+
+        if (token == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("event", new EventCreateDto()    );
+        return "create-event";
+    }
+
     @PostMapping("/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
@@ -84,15 +97,16 @@ public class DashboardController {
         model.addAttribute("error", "Invalid credentials");
         return "login";
     }
+
     @PostMapping("/register")
     public String registerPage(@RequestParam String username,
                                @RequestParam String email,
                                @RequestParam String password,
                                HttpSession session,
                                Model model) {
-        try{
+        try {
             AuthResponseDto auth = dashboardService.register(username, email, password);
-            if(auth != null && auth.getToken() != null){
+            if (auth != null && auth.getToken() != null) {
                 session.setAttribute("token", auth.getToken());
                 session.setAttribute("username", auth.getUsername());
                 session.setAttribute("role", auth.getRole());
@@ -100,9 +114,28 @@ public class DashboardController {
             }
             model.addAttribute("error", "Registration failed");
             return "register";
-        }catch(Exception e){
+        } catch (Exception e) {
             model.addAttribute("error", "Registration failed");
             return "register";
+        }
+    }
+
+    @PostMapping("/events/create")
+    public String createEvent(@ModelAttribute EventCreateDto eventDto,
+                              HttpSession session,
+                              Model model){
+        String token = (String) session.getAttribute("token");
+
+        if(token == null){
+            return "redirect:/login";
+        }
+
+        try{
+            dashboardService.createEvent(eventDto, token);
+            return "redirect:/dashboard";
+        }catch(Exception e){
+            model.addAttribute("error", "Failed to create event: " + e.getMessage());
+            return "create-event";
         }
     }
 }

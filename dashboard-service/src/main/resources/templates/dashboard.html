@@ -82,7 +82,7 @@
             margin-top: 10px;
         }
 
-        .section{
+        .section {
             background: #fffff5;
             border-radius: 15px;
             padding: 20px;
@@ -90,46 +90,80 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .section h2{
+        .section h2 {
             margin-bottom: 20px;
             color: #333333;
         }
 
-        table{
+        table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        th, td{
+        th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
 
-        th{
+        th {
             background: #f8f9fa;
             font-weight: 600;
         }
 
-        .badge{
+        .badge {
             background: #667eea;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
         }
-        .empty{
+
+        .empty {
             text-align: center;
             padding: 40px;
             color: #999;
         }
 
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-links .create-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-links .create-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c0 100%);
+            transform: translateY(-2px);
+        }
 
     </style>
 </head>
 <body>
 <header>
     <div class="logo"> EventHub</div>
+    <div class="nav-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/events/create" class="create-btn">Create Event</a>
+    </div>
     <div class="user-info">
         <span>Welcome, <strong th:text="${username}"></strong>(<span th:text="${role}"></span>)</span>
         <a href="/logout" class="logout-button">Logout</a>

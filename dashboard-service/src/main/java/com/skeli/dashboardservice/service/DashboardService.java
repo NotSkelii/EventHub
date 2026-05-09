@@ -2,15 +2,13 @@ package com.skeli.dashboardservice.service;
 
 import com.skeli.dashboardservice.dto.AnalyticsEventDto;
 import com.skeli.dashboardservice.dto.AuthResponseDto;
+import com.skeli.dashboardservice.dto.EventCreateDto;
 import com.skeli.dashboardservice.dto.EventDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,6 +57,24 @@ public class DashboardService {
         } catch (Exception e) {
             log.error("Login failed: {}", e.getMessage());
             return null;
+        }
+    }
+
+    public void createEvent(EventCreateDto eventDto, String token) {
+        String url = eventServiceUrl + "/api/v1/events";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<EventCreateDto> entity = new HttpEntity<>(eventDto, headers);
+
+        try{
+            restTemplate.postForEntity(url, entity, String.class);
+            log.info("Event created successfully");
+        }catch(Exception e){
+            log.error("Event creation failed: {}", e.getMessage());
+            throw new RuntimeException("Event creation failed. " + e.getMessage());
         }
     }
 
