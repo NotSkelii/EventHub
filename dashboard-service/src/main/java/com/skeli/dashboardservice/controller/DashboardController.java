@@ -10,10 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -75,8 +73,15 @@ public class DashboardController {
         if (token == null) {
             return "redirect:/login";
         }
-        model.addAttribute("event", new EventCreateDto()    );
+        model.addAttribute("event", new EventCreateDto());
         return "create-event";
+    }
+
+    @GetMapping("/check-session")
+    @ResponseBody
+    public String checkSession(HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        return "Token: " + (token != null) + ", Username: " + session.getAttribute("username");
     }
 
     @PostMapping("/login")
@@ -123,20 +128,67 @@ public class DashboardController {
     @PostMapping("/events/create")
     public String createEvent(@ModelAttribute EventCreateDto eventDto,
                               HttpSession session,
-                              Model model){
+                              Model model) {
         String token = (String) session.getAttribute("token");
 
-        if(token == null){
+        if (token == null) {
             return "redirect:/login";
         }
+        // Debug logging
+        log.info("=== Creating Event ===");
+        log.info("Name: {}", eventDto.getName());
+        log.info("Venue: {}", eventDto.getVenue());
+        log.info("City: {}", eventDto.getCity());
+        log.info("Category: {}", eventDto.getCategory());
+        log.info("Event Date: {}", eventDto.getEventDate());
+        log.info("Total Seats: {}", eventDto.getTotalSeats());
+        log.info("Price: {}", eventDto.getPrice());
 
-        try{
+
+        try {
             dashboardService.createEvent(eventDto, token);
             return "redirect:/dashboard";
-        }catch(Exception e){
+        } catch (Exception e) {
             model.addAttribute("error", "Failed to create event: " + e.getMessage());
             return "create-event";
         }
+    }
+
+    @PostMapping("/events/reserve")
+    public String reserveSeats(@RequestParam String eventId, @RequestParam int quantity, HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        String token = (String) session.getAttribute("token");
+
+        if (token == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            dashboardService.reserveSeats(eventId, quantity, token);
+            redirectAttributes.addFlashAttribute("success", "Reserved " + quantity +
+                    " seat(s) successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to reserve seats: " + e.getMessage());
+        }
+        return "redirect:/dashboard";
+    }
+
+    @PostMapping("/events/cancel-reservation")
+    public String cancelSeats(@RequestParam String eventId, @RequestParam int quantity, HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        String token = (String) session.getAttribute("token");
+
+        if (token == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            dashboardService.cancelSeats(eventId, quantity, token);
+            redirectAttributes.addFlashAttribute("success", "Cancelled " + quantity + " seat(s) successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to cancel seats: " + e.getMessage());
+        }
+        return "redirect:/dashboard";
     }
 }
 

@@ -30,15 +30,15 @@ public class DashboardService {
     @Value("${services.analytics}")
     private String analyticsServiceUrl;
 
-    public AuthResponseDto register(String username, String email, String password){
+    public AuthResponseDto register(String username, String email, String password) {
         String url = authServiceUrl + "/api/v1/auth/register";
         RegisterRequest registerRequest = new RegisterRequest(username, email, password);
-        try{
+        try {
             ResponseEntity<AuthResponseDto> response = restTemplate.postForEntity(
                     url, registerRequest, AuthResponseDto.class
             );
             return response.getBody();
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Registration failed: {}", e.getMessage());
             return null;
         }
@@ -69,12 +69,43 @@ public class DashboardService {
 
         HttpEntity<EventCreateDto> entity = new HttpEntity<>(eventDto, headers);
 
-        try{
+        try {
             restTemplate.postForEntity(url, entity, String.class);
             log.info("Event created successfully");
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Event creation failed: {}", e.getMessage());
             throw new RuntimeException("Event creation failed. " + e.getMessage());
+        }
+    }
+
+    public void reserveSeats(String eventId, int quantity, String token) {
+        String url = eventServiceUrl + "/api/v1/events/" + eventId + "/reserve?quantity=" + quantity;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("Reserved {} seats for event {}", quantity, eventId);
+        } catch (Exception e) {
+            log.error("Reservation failed: {}", e.getMessage());
+            throw new RuntimeException("Reservation failed. " + e.getMessage());
+        }
+    }
+
+    public void cancelSeats(String eventId, int quantity, String token) {
+        String url = eventServiceUrl + "/api/v1/events/" + eventId + "/cancel-reservation?quantity=" + quantity;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("Canceled {} seats for event {}", quantity, eventId);
+        } catch (Exception e) {
+            log.error("Failed to cancel reservation: {}", e.getMessage());
+            throw new RuntimeException("Failed to cancel reservation. " + e.getMessage());
         }
     }
 
@@ -124,7 +155,7 @@ public class DashboardService {
         try {
             ResponseEntity<Long> response = restTemplate.getForEntity(url, Long.class);
             return response.getBody() != null ? response.getBody() : 0L;
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Failed to fetch analytics count: {}", e.getMessage());
             return 0L;
         }

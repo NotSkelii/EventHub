@@ -17,7 +17,7 @@ public class EventCreateDto {
     private String city;
     private String category;
 
-    @DateTimeFormat(pattern="yyyy-mm-dd'T'HH:mm")
+    @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime eventDate;
     private Integer totalSeats;
     private BigDecimal price;
