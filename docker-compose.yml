@@ -99,6 +99,38 @@ services:
     networks:
       - eventhub-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: eventhub-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - eventhub-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: eventhub-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - eventhub-network
+    depends_on:
+      - elasticsearch
+
   analytics-service:
     build:
       context: .
@@ -159,6 +191,25 @@ services:
       - event-service
       - analytics-service
 
+  search-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-search
+    container_name: eventhub-search-service
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8085:8085"
+    networks:
+      - eventhub-network
+    restart: unless-stopped
+
 
 volumes:
   postgres_data:
@@ -167,6 +218,7 @@ volumes:
     name: ${POSTGRES_ANALYTICS_VOLUME_NAME:-postgres_analytics_data}
   postgres_authentication_data:
     name: ${POSTGRES_AUTH_VOLUME_NAME:-postgres_authentication_data}
+  elasticsearch_data:
 
 networks:
   eventhub-network:

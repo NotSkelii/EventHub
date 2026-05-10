@@ -38,6 +38,7 @@
         <module>analytics-service</module>
         <module>auth-service</module>
         <module>dashboard-service</module>
+        <module>search-service</module>
     </modules>
 
     <dependencyManagement>
